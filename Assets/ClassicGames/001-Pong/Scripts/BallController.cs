@@ -9,11 +9,18 @@ namespace ClassicGames.Pong
 
         float[] angles = new float[] { -60f, -45f, -30f, 0f,0f, 30f, 45f, 60f };
 
+        [SerializeField] float ballSpeed = 5f;
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
             rb = GetComponent<Rigidbody2D>();
             ChooseDirection();
+        }
+
+        void FixedUpdate()
+        {
+            rb.linearVelocity = moveDirection * ballSpeed;
         }
 
         // Update is called once per frame
@@ -25,27 +32,13 @@ namespace ClassicGames.Pong
             {
                 ResetBallPosition();
             }
-
-            MoveRandomDirection();
         }
 
         void ResetBallPosition()
         {
-            transform.position = Vector3.zero;
+            rb.linearVelocity = Vector2.zero;
+            rb.position = Vector2.zero;
             ChooseDirection();
-        }
-
-        void MoveToRight()
-        {            
-            // #1 move the ball to the right
-            transform.Translate(Vector3.right * Time.deltaTime * 5f);
-        }
-
-        void MoveRandomDirection()
-        {            
-            // #2 calculate move direction, and move the ball in that direction
-            //Vector2 moveDirection = new Vector2(0.6f, Random.Range(-0.3f, 0.3f)).normalized;
-            transform.Translate(moveDirection * Time.deltaTime * 5f);
         }
 
         void ChooseDirection()
@@ -63,7 +56,7 @@ namespace ClassicGames.Pong
                 // calculate the new angle based on the collision point
 
                 // 1. get the contact point of the collision
-                ContactPoint2D contactPoint = collision.contacts[0];
+                ContactPoint2D contactPoint = collision.GetContact(0);
                 Vector2 hitPoint = contactPoint.point;
 
                 // 2. get paddle bottom and top positions
