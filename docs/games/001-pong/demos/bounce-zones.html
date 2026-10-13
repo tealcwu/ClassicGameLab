@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pong | 8 区分区反弹交互演示</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;background:#101722;color:#eaf0f8}
+body{margin:0;padding:28px 16px}.wrap{max-width:850px;margin:auto}h1{font-size:1.7rem;margin-bottom:8px}p{color:#aebbc9;line-height:1.7}
+.panel{background:#182333;border:1px solid #344458;border-radius:14px;padding:20px;margin-top:18px}
+svg{width:100%;height:auto;background:#0e1722;border-radius:10px;touch-action:none}
+.controls{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:15px}
+input[type=range]{width:100%;accent-color:#6dd9ad}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.stat{background:#111c29;padding:13px;border-radius:9px}.stat strong{display:block;font-size:1.4rem;margin-top:5px}.stat span{color:#aebbc9;font-size:.85rem}
+button{background:#31485f;border:0;color:white;border-radius:8px;padding:9px 14px;cursor:pointer}
+small{color:#9dabbc;line-height:1.6;display:block;margin-top:16px}
+@media(max-width:520px){.stats{gap:6px}.stat{padding:9px}.stat strong{font-size:1.1rem}}
+</style></head>
+<body><main class="wrap">
+<h1>#001 Pong · 8 区分区反弹</h1>
+<p>拖动滑块或在球拍上点击，改变击中位置。演示按球拍高度划分 8 区，每区对应一个固定反弹角度。</p>
+<section class="panel">
+<svg id="stage" viewBox="0 0 720 380" role="img" aria-label="球拍分区和反弹轨迹">
+<line x1="0" y1="190" x2="720" y2="190" stroke="#34465a" stroke-dasharray="7 8"/>
+<g id="zones"></g><g id="trajectory"></g>
+<circle id="ball" cx="123" cy="190" r="9" fill="#fff"/>
+<text x="30" y="24" fill="#b9c7d8" font-size="16">左侧 Paddle · 向右反弹</text>
+</svg>
+<div class="controls"><input id="position" aria-label="击中位置" type="range" min="0" max="0.9999" step="0.0001" value="0.62"><button id="reset">重置</button></div>
+<div class="stats">
+<div class="stat"><span>归一化位置（底→顶）</span><strong id="value">0.620</strong></div>
+<div class="stat"><span>区域（底→顶）</span><strong id="zone">5 / 8</strong></div>
+<div class="stat"><span>反弹角度</span><strong id="angle">0°</strong></div>
+</div>
+<small>角度表（从底到顶）：−60°、−45°、−30°、0°、0°、30°、45°、60°。这是用于教学的近似设计，不代表 1972 年原版 Pong 的精确硬件参数。角度相对于向右的水平线；正角度向上。</small>
+</section></main>
+<script>
+const angles=[-60,-45,-30,0,0,30,45,60];
+const slider=document.getElementById('position');
+const zones=document.getElementById('zones');
+const trajectory=document.getElementById('trajectory');
+const ball=document.getElementById('ball');
+const svg=document.getElementById('stage');
+const top=54,bottom=326,left=100,height=bottom-top;
+function render(){
+ const u=Number(slider.value),index=Math.min(7,Math.floor(u*8));
+ const angle=angles[index],rad=angle*Math.PI/180,y=bottom-u*height;
+ zones.innerHTML=Array.from({length:8},(_,topIndex)=>{
+ const i=7-topIndex,yy=top+topIndex*height/8;
+ return '<rect x="'+left+'" y="'+yy+'" width="16" height="'+(height/8-1)+'" rx="1" fill="'+(i===index?'#f7be6d':'#52677e')+'"/><text x="88" y="'+(yy+23)+'" fill="#bac9da" font-size="13" text-anchor="end">'+i+'</text>';
+ }).join('');
+ const x1=123,x2=x1+220*Math.cos(rad),y2=y-220*Math.sin(rad);
+ trajectory.innerHTML='<line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y2+'" stroke="#70ddb0" stroke-width="4" stroke-linecap="round"/><circle cx="'+x2+'" cy="'+y2+'" r="5" fill="#70ddb0"/>';
+ ball.setAttribute('cy',y);
+ document.getElementById('value').textContent=u.toFixed(3);
+ document.getElementById('zone').textContent=(index+1)+' / 8';
+ document.getElementById('angle').textContent=(angle>0?'+':'')+angle+'°';
+}
+slider.addEventListener('input',render);
+document.getElementById('reset').addEventListener('click',()=>{slider.value=0.62;render()});
+svg.addEventListener('pointerdown',e=>{
+ const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+ const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+ slider.value=Math.max(0,Math.min(.9999,(bottom-p.y)/height));render();
+});
+render();
+</script></body></html>
