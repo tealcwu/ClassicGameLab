@@ -18,11 +18,11 @@ small{color:#9dabbc;line-height:1.6;display:block;margin-top:16px}
 </style></head>
 <body><main class="wrap">
 <h1>#001 Pong · 8 区分区反弹</h1>
-<p>拖动滑块或在球拍上点击，改变击中位置。演示按球拍高度划分 8 区，每区对应一个固定反弹角度。</p>
+<p>拖动滑块或点击左侧球拍的任意分区，观察球的反弹方向。演示按球拍高度划分 8 区，每区对应一个固定反弹角度。</p>
 <section class="panel">
 <svg id="stage" viewBox="0 0 720 380" role="img" aria-label="球拍分区和反弹轨迹">
 <line x1="0" y1="190" x2="720" y2="190" stroke="#34465a" stroke-dasharray="7 8"/>
-<g id="zones"></g><g id="trajectory"></g>
+<rect x="100" y="54" width="16" height="272" rx="2" fill="#52677e"/><g id="zones"></g><g id="trajectory"></g>
 <circle id="ball" cx="123" cy="190" r="9" fill="#fff"/>
 <text x="30" y="24" fill="#b9c7d8" font-size="16">左侧 Paddle · 向右反弹</text>
 </svg>
@@ -41,13 +41,13 @@ const zones=document.getElementById('zones');
 const trajectory=document.getElementById('trajectory');
 const ball=document.getElementById('ball');
 const svg=document.getElementById('stage');
-const top=54,bottom=326,left=100,height=bottom-top;
+const paddleTop=54,paddleBottom=326,paddleLeft=100,paddleHeight=paddleBottom-paddleTop;
 function render(){
  const u=Number(slider.value),index=Math.min(7,Math.floor(u*8));
- const angle=angles[index],rad=angle*Math.PI/180,y=bottom-u*height;
+ const angle=angles[index],rad=angle*Math.PI/180,y=paddleBottom-u*paddleHeight;
  zones.innerHTML=Array.from({length:8},(_,topIndex)=>{
- const i=7-topIndex,yy=top+topIndex*height/8;
- return '<rect x="'+left+'" y="'+yy+'" width="16" height="'+(height/8-1)+'" rx="1" fill="'+(i===index?'#f7be6d':'#52677e')+'"/><text x="88" y="'+(yy+23)+'" fill="#bac9da" font-size="13" text-anchor="end">'+i+'</text>';
+ const i=7-topIndex,yy=paddleTop+topIndex*paddleHeight/8;
+ return '<rect x="'+paddleLeft+'" y="'+yy+'" width="16" height="'+(paddleHeight/8-1)+'" rx="1" fill="'+(i===index?'#f7be6d':'#52677e')+'"/><text x="88" y="'+(yy+23)+'" fill="#bac9da" font-size="13" text-anchor="end">'+i+'</text>';
  }).join('');
  const x1=123,x2=x1+220*Math.cos(rad),y2=y-220*Math.sin(rad);
  trajectory.innerHTML='<line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y2+'" stroke="#70ddb0" stroke-width="4" stroke-linecap="round"/><circle cx="'+x2+'" cy="'+y2+'" r="5" fill="#70ddb0"/>';
@@ -61,7 +61,7 @@ document.getElementById('reset').addEventListener('click',()=>{slider.value=0.62
 svg.addEventListener('pointerdown',e=>{
  const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
  const p=pt.matrixTransform(svg.getScreenCTM().inverse());
- slider.value=Math.max(0,Math.min(.9999,(bottom-p.y)/height));render();
+ slider.value=Math.max(0,Math.min(.9999,(paddleBottom-p.y)/paddleHeight));render();
 });
 render();
 </script></body></html>
